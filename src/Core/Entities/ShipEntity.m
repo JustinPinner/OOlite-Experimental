@@ -322,6 +322,7 @@ static ShipEntity *doOctreesCollide(ShipEntity *prime, ShipEntity *other);
 	{
 		// These items are not available in strict mode.
 		if ([shipDict oo_fuzzyBooleanForKey:@"has_fuel_injection"])  [self addEquipmentItem:@"EQ_FUEL_INJECTION" inContext:@"npc"];
+        if ([shipDict oo_fuzzyBooleanForKey:@"has_laser_cooler"])   [self addEquipmentItem:@"EQ_LASER_COOLER" inContext:@"npc"];
 #if USEMASC
 		if ([shipDict oo_fuzzyBooleanForKey:@"has_military_jammer"])  [self addEquipmentItem:@"EQ_MILITARY_JAMMER" inContext:@"npc"];
 		if ([shipDict oo_fuzzyBooleanForKey:@"has_military_scanner_filter"])  [self addEquipmentItem:@"EQ_MILITARY_SCANNER_FILTER" inContext:@"npc"];
@@ -3402,6 +3403,10 @@ ShipEntity* doOctreesCollide(ShipEntity* prime, ShipEntity* other)
 	return [self hasEquipmentItem:@"EQ_HEAT_SHIELD"];
 }
 
+- (BOOL) hasLaserCooler
+{
+    return [self hasEquipmentItem:@"EQ_LASER_COOLER"];
+}
 
 - (BOOL) hasFuelInjection
 {

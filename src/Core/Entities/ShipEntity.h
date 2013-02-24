@@ -589,6 +589,7 @@ typedef enum
 - (BOOL) hasShieldBooster;
 - (BOOL) hasMilitaryShieldEnhancer;
 - (BOOL) hasHeatShield;
+- (BOOL) hasLaserCooler;
 - (BOOL) hasFuelInjection;
 - (BOOL) hasCascadeMine;
 - (BOOL) hasEscapePod;

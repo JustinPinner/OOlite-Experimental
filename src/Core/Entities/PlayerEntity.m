@@ -910,6 +910,7 @@ static GLfloat		sBaseMass = 0.0;
 	if (!strict)
 	{
 		if ([dict oo_boolForKey:@"has_fuel_injection"])		[equipment oo_setBool:YES forKey:@"EQ_FUEL_INJECTION"];
+        if ([dict oo_boolForKey:@"has_laser_cooler"])       [equipment oo_setBool:YES forKey:@"EQ_LASER_COOLER"];
 	}
 	
 	// Legacy energy unit type -> energy unit equipment item
@@ -1965,7 +1966,12 @@ static GLfloat		sBaseMass = 0.0;
 	
 	UPDATE_STAGE(@"updating weapon temperatures and shot times");
 	// cool all weapons.
-	float coolAmount = WEAPON_COOLING_FACTOR * delta_t;
+    float coolFactor = WEAPON_COOLING_FACTOR;
+    if ([self hasLaserCooler])
+    {
+        coolFactor += 14.0f;
+    }
+	float coolAmount = coolFactor * delta_t;
 	forward_weapon_temp = fdim(forward_weapon_temp, coolAmount);
 	aft_weapon_temp = fdim(aft_weapon_temp, coolAmount);
 	port_weapon_temp = fdim(port_weapon_temp, coolAmount);
