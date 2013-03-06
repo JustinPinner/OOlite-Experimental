@@ -2034,11 +2034,17 @@ ShipEntity* doOctreesCollide(ShipEntity* prime, ShipEntity* other)
 #endif
 	
 	// cool all weapons.
-	weapon_temp = fmaxf(weapon_temp - (float)(WEAPON_COOLING_FACTOR * delta_t), 0.0f);
-	forward_weapon_temp = fmaxf(forward_weapon_temp - (float)(WEAPON_COOLING_FACTOR * delta_t), 0.0f);
-	aft_weapon_temp = fmaxf(aft_weapon_temp - (float)(WEAPON_COOLING_FACTOR * delta_t), 0.0f);
-	port_weapon_temp = fmaxf(port_weapon_temp - (float)(WEAPON_COOLING_FACTOR * delta_t), 0.0f);
-	starboard_weapon_temp = fmaxf(starboard_weapon_temp - (float)(WEAPON_COOLING_FACTOR * delta_t), 0.0f);
+    float coolFactor = WEAPON_COOLING_FACTOR;
+    if ([self hasLaserCooler])
+    {
+        coolFactor *= SUPER_COOLER_RADIATOR_COOLING_MULTIPLIER;
+    }
+	float coolAmount = coolFactor * delta_t;
+	weapon_temp = fmaxf(weapon_temp - (float)(coolAmount * delta_t), 0.0f);
+	forward_weapon_temp = fmaxf(forward_weapon_temp - (float)(coolAmount * delta_t), 0.0f);
+	aft_weapon_temp = fmaxf(aft_weapon_temp - (float)(coolAmount * delta_t), 0.0f);
+	port_weapon_temp = fmaxf(port_weapon_temp - (float)(coolAmount * delta_t), 0.0f);
+	starboard_weapon_temp = fmaxf(starboard_weapon_temp - (float)(coolAmount * delta_t), 0.0f);
 	
 	// update time between shots
 	shot_time += delta_t;
