@@ -9874,22 +9874,24 @@ Vector positionOffsetForShipInRotationToAlignment(ShipEntity* ship, Quaternion q
 
 	if (fired)
 	{
-		switch (direction)
+		double shotTemp = [self calculateShotTemp:weapon_type];
+        
+        switch (direction)
 		{
 			case WEAPON_FACING_FORWARD:
-				forward_weapon_temp += weapon_shot_temperature;
+				forward_weapon_temp += shotTemp;
 				break;
 				
 			case WEAPON_FACING_AFT:
-				aft_weapon_temp += weapon_shot_temperature;
+				aft_weapon_temp += shotTemp;
 				break;
 				
 			case WEAPON_FACING_PORT:
-				port_weapon_temp += weapon_shot_temperature;
+				port_weapon_temp += shotTemp;
 				break;
 				
 			case WEAPON_FACING_STARBOARD:
-				starboard_weapon_temp += weapon_shot_temperature;
+				starboard_weapon_temp += shotTemp;
 				break;
 				
 			case WEAPON_FACING_NONE:
@@ -9914,6 +9916,33 @@ Vector positionOffsetForShipInRotationToAlignment(ShipEntity* ship, Quaternion q
 	}
 	
 	return fired;
+}
+
+- (double) calculateShotTemp:(OOWeaponType)weapon_type
+{
+    //int weapon_to_be_fired = [self weapon_type];
+	double new_shot_temp = weapon_shot_temperature;
+    
+    switch (weapon_type)
+	{
+		case WEAPON_PULSE_LASER:
+		case WEAPON_BEAM_LASER:
+		case WEAPON_MINING_LASER:
+		case WEAPON_MILITARY_LASER:
+            if ([self hasLaserCooler])
+            {
+                new_shot_temp = weapon_shot_temperature - (weapon_shot_temperature / SUPER_COOLER_RADIATOR_COOLING_MULTIPLIER);
+            }
+			break;
+		case WEAPON_THARGOID_LASER:
+		case WEAPON_PLASMA_CANNON:
+        case WEAPON_NONE:
+        case WEAPON_UNDEFINED:
+			new_shot_temp = weapon_shot_temperature;
+            break;
+	}
+    
+    return new_shot_temp;
 }
 
 

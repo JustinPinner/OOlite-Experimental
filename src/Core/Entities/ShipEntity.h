@@ -535,6 +535,7 @@ typedef enum
 - (Vector) forwardWeaponOffset;
 - (Vector) portWeaponOffset;
 - (Vector) starboardWeaponOffset;
+- (double) calculateShotTemp:(OOWeaponType)weapon_type;
 
 - (BOOL) isFrangible;
 - (BOOL) suppressFlightNotifications;
