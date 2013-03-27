@@ -288,9 +288,9 @@ static BOOL CheckNameConflict(NSString *lcName, NSDictionary *directoryCases, NS
 			{
 				while ([errorString hasPrefix:@"\t"])
 				{
-					errorString = [@"    " stringByAppendingString:[errorString substringFromIndex:1]];
+					errorString = [@"verifyOXP.plist.parseError " stringByAppendingString:[errorString substringFromIndex:1]];
 				}
-				OOLog(@"verifyOXP.plist.parseError", errorString);
+				OOLog(@"verifyOXP.plist.parseError ", @"%@", errorString);
 			}
 			OOLogOutdent();
 		}
