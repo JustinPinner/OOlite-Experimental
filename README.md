@@ -31,9 +31,22 @@ $ cd path/to/oolite/trunk
 $ . `locate GNUstep.sh`
 $ make
 
-And then here's where I'm still having problems:
+which seems to go along nicely and then;
+
+ Linking objc_program oolite ...
+/usr/bin/ld: cannot find -ljs_static
+collect2: ld returned 1 exit status
+make[3]: *** [obj.spk/oolite] Error 1
+make[2]: *** [internal-objc_program-all_] Error 2
+make[1]: *** [oolite.all.objc-program.variables] Error 2
+make: *** [internal-all] Error 2
+
+
+so I figured I'd try;
 
 $ make -f libjs.make
+
+but that's not quite working
 
 Updating Javascript sources...
 
