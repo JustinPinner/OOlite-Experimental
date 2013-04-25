@@ -39,7 +39,7 @@ MA 02110-1301, USA.
 #import "OOConstToJSString.h"
 
 #if OO_CACHE_JS_SCRIPTS
-#include <jsxdrapi.h>
+#include <js/jsxdrapi.h>
 #import "OOCacheManager.h"
 #endif
 

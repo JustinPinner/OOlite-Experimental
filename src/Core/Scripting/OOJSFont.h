@@ -30,7 +30,7 @@ SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 
 void InitOOJSFont(JSContext *context, JSObject *global);

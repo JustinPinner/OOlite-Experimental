@@ -25,7 +25,7 @@ SOFTWARE.
 
 */
 
-#include <jsdbgapi.h>
+#include <js/jsdbgapi.h>
 #import "OOJSEngineTimeManagement.h"
 #import "OOProfilingStopwatch.h"
 #import "OOJSScript.h"

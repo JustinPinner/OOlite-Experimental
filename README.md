@@ -14,3 +14,38 @@ A: I guess. As far as I know the source is all freely available. I'm not claimin
 Q: Why did you create this repo?
 A: I want to mess about with the OOlite code, and be able to get back to a working state when I inevitably screw it up.
 
+
+Notes for building on Ubuntu.
+(this isn't fully working yet but here's what I had to do to at least get the majority of the files to compile)
+
+thanks to @mart_brooks for the tips
+
+$ sudo apt-get install gnustep-core-devel gnustep-devel
+$ sudo apt-get install libsdl1.2-dev
+$ sudo apt-get install libnspr4-dev libnspr4
+$ sudo apt-get install libmozjs185-dev
+$ sudo apt-get install libsdl-mixer1.2-dev
+$ sudo apt-get install  libespeak-dev
+
+$ cd path/to/oolite/trunk
+$ . `locate GNUstep.sh`
+$ make
+
+And then here's where I'm still having problems:
+
+$ make -f libjs.make
+
+Updating Javascript sources...
+
+cd deps/Cocoa-deps/scripts && ./update-mozilla.sh
+libjs is up to date.
+mkdir -p deps/Cross-platform-deps/mozilla/js/src/build-release
+
+Configuring Javascript library...
+
+cd deps/Cross-platform-deps/mozilla/js/src/build-release && ../configure --disable-shared-js --enable-threadsafe --with-system-nspr --disable-tests --enable-trace-jscalls
+loading cache ./config.cache
+configure: error: can not find install-sh or install.sh in ../build/autoconf ../../build/autoconf
+make: *** [deps/Cross-platform-deps/mozilla/js/src/build-release/config_stamp] Error 1
+
+

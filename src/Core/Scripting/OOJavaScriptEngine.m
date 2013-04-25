@@ -22,7 +22,7 @@ MA 02110-1301, USA.
 
 */
 
-#include <jsdbgapi.h>
+#include <js/jsdbgapi.h>
 #import "OOJavaScriptEngine.h"
 #import "OOJSEngineTimeManagement.h"
 #import "OOJSScript.h"

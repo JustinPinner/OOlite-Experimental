@@ -24,7 +24,7 @@ MA 02110-1301, USA.
 */
 
 #import "OOJSScript.h"
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 @interface OOJSInterfaceDefinition: OOWeakRefObject
 {

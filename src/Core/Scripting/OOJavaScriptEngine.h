@@ -27,7 +27,7 @@ MA 02110-1301, USA.
 #import "Universe.h"
 #import "PlayerEntity.h"
 #import "PlayerEntityLegacyScriptEngine.h"
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 
 #define OOJSENGINE_MONITOR_SUPPORT	(!defined(NDEBUG))

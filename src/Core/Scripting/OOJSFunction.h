@@ -27,7 +27,7 @@ MA 02110-1301, USA.
 
 
 #import "OOCocoa.h"
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 
 @interface OOJSFunction: NSObject

@@ -25,7 +25,7 @@ MA 02110-1301, USA.
 
 */
 
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 
 void InitOOJSShipGroup(JSContext *context, JSObject *global);

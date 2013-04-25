@@ -27,7 +27,7 @@ MA 02110-1301, USA.
 
 #import "OOScriptTimer.h"
 #import "OOJSScript.h"
-#include <jsapi.h>
+#include <js/jsapi.h>
 
 
 @interface OOJSTimer: OOScriptTimer
