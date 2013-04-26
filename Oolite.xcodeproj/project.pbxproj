@@ -4339,6 +4339,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = Debug;
@@ -4347,6 +4348,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = Deployment;
@@ -4355,6 +4357,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = TestRelease;
