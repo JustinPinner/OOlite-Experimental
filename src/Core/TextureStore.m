@@ -149,15 +149,15 @@ static void fillSquareImageWithPlanetTex(unsigned char * imageBuffer, int width,
 }
 
 
-+ (BOOL) getCloudTextureNameFor:(OOColor*) color : (GLfloat) impress : (GLfloat) bias intoData:(unsigned char **)textureData width:(GLuint *)textureWidth height:(GLuint *)textureHeight
++ (BOOL) getCloudTextureNameFor : (OOColor*) color : (GLfloat) impress : (GLfloat) bias intoData :(unsigned char **) textureData width : (GLuint *) textureWidth height : (GLuint *) textureHeight
 {
-	int					texture_h = PROC_TEXTURE_SIZE;
-	int					texture_w = PROC_TEXTURE_SIZE;
-	int					tex_bytes;
+    int texture_h = PROC_TEXTURE_SIZE;
+	int texture_w = PROC_TEXTURE_SIZE;
+	int tex_bytes;
 	
 	tex_bytes = texture_w * texture_h * 4;
 	
-	NSParameterAssert(textureData != NULL && textureWidth != NULL && textureHeight != NULL);
+    NSParameterAssert(textureData != NULL && textureWidth != NULL && textureHeight != NULL);
 	
 	unsigned char *imageBuffer = malloc(tex_bytes);
 	if (imageBuffer == NULL)  return NO;
@@ -166,7 +166,7 @@ static void fillSquareImageWithPlanetTex(unsigned char * imageBuffer, int width,
 	*textureWidth = texture_w;
 	*textureHeight = texture_h;
 	
-	fillSquareImageDataWithCloudTexture( imageBuffer, texture_w, color, impress, bias);
+	fillSquareImageDataWithCloudTexture(imageBuffer, texture_w, color, impress, bias);
 	
 	return YES;
 }

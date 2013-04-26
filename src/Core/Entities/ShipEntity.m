@@ -9945,7 +9945,6 @@ Vector positionOffsetForShipInRotationToAlignment(ShipEntity* ship, Quaternion q
     return new_shot_temp;
 }
 
-
 - (BOOL) fireMainWeapon:(double)range
 {
 	// set the values from forward_weapon_type.
