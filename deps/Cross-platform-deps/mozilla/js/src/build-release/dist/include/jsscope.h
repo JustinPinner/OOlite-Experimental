@@ -1,1 +1,0 @@
-../../../build-release/../jsscope.h

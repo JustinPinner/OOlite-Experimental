@@ -1,1 +1,0 @@
-../../../build-release/../jsscript.h
