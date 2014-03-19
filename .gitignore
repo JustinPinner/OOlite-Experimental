@@ -1,6 +1,7 @@
 # Xcode
 .DS_Store
 build/
+deps/Cross-platform-deps/mozilla/js/src/build-release/
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -17,3 +18,4 @@ profile
 DerivedData
 .idea/
 oolite.app/
+AddOns/
