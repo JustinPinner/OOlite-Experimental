@@ -11,6 +11,7 @@ Nicolas Boulenguez
 Eugene Chernyakov (seventh)
 colinh
 Commander McLane
+Paul Cooper (PhantorGorth)
 Dermot Costello
 Chris Crowther (hikari)
 Blake Deakins (Cmd. Cheyd)
@@ -29,6 +30,7 @@ No Sleep Nigel
 Vladimir A. Pavlov (pv4)
 Dennis Pedersen (Frame)
 Erich Ritz (drumz)
+Jay Roper (Halfhand)
 Darren Salt (dsalt/_ds_)
 Adam Sampson
 Chip Richards (caracal)
@@ -39,6 +41,7 @@ Dylan Smith (winston)
 stardotstar
 Konstantinos Sykas (Getafix)
 David Taylor (dajt)
+Tichy
 Eric Walch
 Michael Werle (Micha)
 Gary Wong (Y A J)

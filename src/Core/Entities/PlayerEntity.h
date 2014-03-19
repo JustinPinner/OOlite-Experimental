@@ -36,7 +36,7 @@ MA 02110-1301, USA.
 
 @class GuiDisplayGen, OOTrumble, MyOpenGLView, HeadUpDisplay, ShipEntity;
 @class OOSound, OOSoundSource, OOSoundReferencePoint;
-@class OOJoystickManager, OOTexture;
+@class OOJoystickManager, OOTexture, OOLaserShotEntity;
 
 #ifndef FEATURE_REQUEST_5496
 #define FEATURE_REQUEST_5496 1
@@ -387,6 +387,8 @@ typedef enum
 	GLfloat					fuel_leak_rate;
 	
 	// keys!
+	NSDictionary   *keyconfig_settings;
+
 	OOKeyCode				key_roll_left;
 	OOKeyCode				key_roll_right;
 	OOKeyCode				key_pitch_forward;
@@ -555,6 +557,7 @@ typedef enum
 	WormholeEntity			*wormhole;
 
 	ShipEntity				*demoShip; // Used while docked to maintain demo ship rotation.
+	OOLaserShotEntity *lastShot; // used to correctly position laser shots on first frame of firing
 }
 
 + (PlayerEntity *) sharedPlayer;
@@ -632,6 +635,8 @@ typedef enum
 - (void) setForwardShieldLevel:(GLfloat)level;
 - (void) setAftShieldLevel:(GLfloat)level;
 
+// return keyconfig.plist settings for scripting
+- (NSDictionary *) keyConfig;
 - (BOOL) isMouseControlOn;
 
 - (GLfloat) dialRoll;
@@ -709,11 +714,13 @@ typedef enum
 - (BOOL) fireEnergyBomb;
 - (ShipEntity *) launchMine:(ShipEntity *)mine;
 
+- (void) activateCloakingDevice;
+- (void) deactivateCloakingDevice;
+
 - (BOOL) weaponsOnline;
 - (void) setWeaponsOnline:(BOOL)newValue;
 
 - (BOOL) fireMainWeapon;
-- (double) calculateShotTemp;
 
 - (OOWeaponType) weaponForFacing:(OOWeaponFacing)facing;
 - (OOWeaponType) currentWeapon;
@@ -726,6 +733,7 @@ typedef enum
 
 - (BOOL) witchJumpChecklist:(BOOL)isGalacticJump;
 - (void) enterGalacticWitchspace;
+- (void) setJumpType:(BOOL)isGalacticJump;
 
 - (BOOL) takeInternalDamage;
 
@@ -881,6 +889,8 @@ typedef enum
 - (void) addMissionDestinationMarker:(NSDictionary *)marker;
 - (BOOL) removeMissionDestinationMarker:(NSDictionary *)marker;
 - (NSMutableDictionary*) getMissionDestinations;
+
+- (void) setLastShot:(OOLaserShotEntity *)shot;
 
 @end
 

@@ -37,6 +37,7 @@ MA 02110-1301, USA.
 #import "WormholeEntity.h"
 #import "ProxyPlayerEntity.h"
 #import "OOQuiriumCascadeEntity.h"
+#import "OOLaserShotEntity.h"
 #import "OOMesh.h"
 
 #import "OOMaths.h"
@@ -128,7 +129,7 @@ static GLfloat		sBaseMass = 0.0;
 - (BOOL) tryBuyingItem:(NSString *)eqKey;
 
 // Cargo & passenger contracts
-- (NSArray*) contractsListForScriptingFromArray:(NSArray *) contracts_array forCargo:(BOOL)forCargo;
+- (NSArray*) contractsListForScriptingFromArray:(NSArray *)contractsArray forCargo:(BOOL)forCargo;
 
 - (void) prepareMarkedDestination:(NSMutableDictionary *)markers :(NSDictionary *)marker;
 
@@ -910,7 +911,6 @@ static GLfloat		sBaseMass = 0.0;
 	if (!strict)
 	{
 		if ([dict oo_boolForKey:@"has_fuel_injection"])		[equipment oo_setBool:YES forKey:@"EQ_FUEL_INJECTION"];
-        if ([dict oo_boolForKey:@"has_laser_cooler"])       [equipment oo_setBool:YES forKey:@"EQ_LASER_COOLER"];
 	}
 	
 	// Legacy energy unit type -> energy unit equipment item
@@ -1465,6 +1465,7 @@ static GLfloat		sBaseMass = 0.0;
 	aft_weapon_temp			= 0.0f;
 	port_weapon_temp		= 0.0f;
 	starboard_weapon_temp	= 0.0f;
+	lastShot = nil;
 	forward_shot_time		= INITIAL_SHOT_TIME;
 	aft_shot_time			= INITIAL_SHOT_TIME;
 	port_shot_time			= INITIAL_SHOT_TIME;
@@ -1472,7 +1473,13 @@ static GLfloat		sBaseMass = 0.0;
 	ship_temperature		= 60.0f;
 	alertFlags				= 0;
 	hyperspeed_engaged		= NO;
+	autopilot_engaged = NO;
+	velocity = kZeroVector;
 	
+	flightRoll = 0.0f;
+	flightPitch = 0.0f;
+	flightYaw = 0.0f;
+
 	max_passengers = 0;
 	[passengers release];
 	passengers = [[NSMutableArray alloc] init];
@@ -1636,7 +1643,7 @@ static GLfloat		sBaseMass = 0.0;
 	[self setGalacticHyperspaceBehaviourTo:[[UNIVERSE planetInfo] oo_stringForKey:@"galactic_hyperspace_behaviour" defaultValue:@"BEHAVIOUR_STANDARD"]];
 	[self setGalacticHyperspaceFixedCoordsTo:[[UNIVERSE planetInfo] oo_stringForKey:@"galactic_hyperspace_fixed_coords" defaultValue:@"96 96"]];
 	
-	[self setCloaked:NO];
+	cloaking_device_active = NO;
 
 	demoShip = nil;
 	
@@ -1756,6 +1763,7 @@ static GLfloat		sBaseMass = 0.0;
 	DESTROY(compassTarget);
 	DESTROY(hud);
 	DESTROY(commLog);
+	DESTROY(keyconfig_settings);
 	
 	DESTROY(worldScripts);
 	DESTROY(worldScriptsRequiringTickle);
@@ -1966,12 +1974,7 @@ static GLfloat		sBaseMass = 0.0;
 	
 	UPDATE_STAGE(@"updating weapon temperatures and shot times");
 	// cool all weapons.
-    float coolFactor = WEAPON_COOLING_FACTOR;
-    if ([self hasLaserCooler])
-    {
-        coolFactor *= SUPER_COOLER_RADIATOR_COOLING_MULTIPLIER;
-    }
-	float coolAmount = coolFactor * delta_t;
+	float coolAmount = WEAPON_COOLING_FACTOR * delta_t;
 	forward_weapon_temp = fdim(forward_weapon_temp, coolAmount);
 	aft_weapon_temp = fdim(aft_weapon_temp, coolAmount);
 	port_weapon_temp = fdim(port_weapon_temp, coolAmount);
@@ -2138,7 +2141,7 @@ static GLfloat		sBaseMass = 0.0;
 	
 	//Bug #11692 CmdrJames added Status entering witchspace
 	OOEntityStatus status = [self status];
-	if ((status != STATUS_AUTOPILOT_ENGAGED)&&(status != STATUS_ESCAPE_SEQUENCE) && (status != STATUS_ENTERING_WITCHSPACE))
+	if ((status != STATUS_ESCAPE_SEQUENCE) && (status != STATUS_ENTERING_WITCHSPACE))
 	{
 		UPDATE_STAGE(@"updating cabin temperature");
 		
@@ -2348,13 +2351,19 @@ static GLfloat		sBaseMass = 0.0;
 			bounding_box_add_vector(&totalBoundingBox, sebb.min);
 		}
 	}
+	// and one thing which isn't a subentity. Fixes bug with
+	// mispositioned laser beams particularly noticeable on side view.
+	if (lastShot != nil)
+	{
+		[lastShot update:0.0];
+		lastShot = nil;
+	}
 	
 	STAGE_TRACKING_END
 }
 
 
-- (void) updateMovementFlags
-{
+- (void) updateMovementFlags{
 	hasMoved = !vector_equal(position, lastPosition);
 	hasRotated = !quaternion_equal(orientation, lastOrientation);
 	lastPosition = position;
@@ -2511,7 +2520,8 @@ static GLfloat		sBaseMass = 0.0;
 
 - (void) performAutopilotUpdates:(OOTimeDelta)delta_t
 {
-	[super update:delta_t];
+
+	[self processBehaviour:delta_t];
 	[self doBookkeeping:delta_t];
 }
 
@@ -3115,6 +3125,8 @@ static GLfloat		sBaseMass = 0.0;
 }
 
 
+/* TODO post 1.78: profiling suggests this gets called often enough
+ * that it's worth caching the result per-frame - CIM */
 - (Vector) viewpointPosition
 {
 	Vector		viewpoint = position;
@@ -3296,6 +3308,12 @@ static GLfloat		sBaseMass = 0.0;
 - (void) setAftShieldLevel:(GLfloat)level
 {
 	aft_shield = OOClamp_0_max_f(level, [self maxAftShieldLevel]);
+}
+
+
+- (NSDictionary *) keyConfig
+{
+	return keyconfig_settings;
 }
 
 
@@ -4066,6 +4084,11 @@ static GLfloat		sBaseMass = 0.0;
 	
 	if (![self weaponsOnline])  return nil;
 	
+	// check if we were cloaked before firing the missile - can't use
+	// cloaking_device_active directly because fireMissilewithIdentifier: andTarget:
+	// will reset it in case passive cloak is set - Nikos 20130313
+	BOOL cloakedPriorToFiring = cloaking_device_active;
+	
 	launchingMissile = YES;
 	replacingMissile = NO;
 
@@ -4085,11 +4108,15 @@ static GLfloat		sBaseMass = 0.0;
 		{
 			if (!replacingMissile) [self removeFromPylon:activeMissile];
 			[self playMissileLaunched];
-			if (cloaking_device_active && cloakPassive)
-			{
-				[UNIVERSE addMessage:DESC(@"cloak-off") forCount:2];
-			}
 		}
+	}
+	
+	if (cloakedPriorToFiring && cloakPassive)
+	{
+		// fireMissilewithIdentifier: andTarget: has already taken care of deactivating
+		// the cloak in the case of missiles by the time we get here, but explicitly
+		// calling deactivateCloakingDevice is needed in order to be covered fully with mines too
+		[self deactivateCloakingDevice];
 	}
 	
 	replacingMissile = NO;
@@ -4158,6 +4185,33 @@ static GLfloat		sBaseMass = 0.0;
 	replacingMissile = YES;
 	
 	return YES;
+}
+
+
+- (void) activateCloakingDevice
+{
+	if (![self hasCloakingDevice])  return;
+	
+	if ([super activateCloakingDevice])
+	{
+		[UNIVERSE addMessage:DESC(@"cloak-on") forCount:2];
+		[self playCloakingDeviceOn];
+	}
+	else
+	{
+		[UNIVERSE addMessage:DESC(@"cloak-low-juice") forCount:3];
+		[self playCloakingDeviceInsufficientEnergy];
+	}
+}
+
+
+- (void) deactivateCloakingDevice
+{
+	if (![self hasCloakingDevice])  return;
+
+	[super deactivateCloakingDevice];
+	[UNIVERSE addMessage:DESC(@"cloak-off") forCount:2];
+	[self playCloakingDeviceOff];
 }
 
 
@@ -4311,26 +4365,26 @@ static GLfloat		sBaseMass = 0.0;
 	using_mining_laser = (weapon_to_be_fired == WEAPON_MINING_LASER);
 
 	energy -= weapon_energy_use;
-    
+
 	switch (currentWeaponFacing)
 	{
 		case WEAPON_FACING_FORWARD:
-			forward_weapon_temp += [self calculateShotTemp];
+			forward_weapon_temp += weapon_shot_temperature;
 			forward_shot_time = 0.0;
 			break;
 			
 		case WEAPON_FACING_AFT:
-			aft_weapon_temp += [self calculateShotTemp];
+			aft_weapon_temp += weapon_shot_temperature;
 			aft_shot_time = 0.0;
 			break;
 			
 		case WEAPON_FACING_PORT:
-			port_weapon_temp += [self calculateShotTemp];
+			port_weapon_temp += weapon_shot_temperature;
 			port_shot_time = 0.0;
 			break;
 			
 		case WEAPON_FACING_STARBOARD:
-			starboard_weapon_temp += [self calculateShotTemp];
+			starboard_weapon_temp += weapon_shot_temperature;
 			starboard_shot_time = 0.0;
 			break;
 			
@@ -4361,37 +4415,11 @@ static GLfloat		sBaseMass = 0.0;
 	if (weaponFired && cloaking_device_active && cloakPassive)
 	{
 		[self deactivateCloakingDevice];
-		[UNIVERSE addMessage:DESC(@"cloak-off") forCount:2];
 	}	
 	
 	return weaponFired;
 }
 
-- (double) calculateShotTemp
-{
-    int weapon_to_be_fired = [self currentWeapon];
-	double new_shot_temp = weapon_shot_temperature;
-    
-    switch (weapon_to_be_fired)
-	{
-		case WEAPON_PULSE_LASER:
-		case WEAPON_BEAM_LASER:
-		case WEAPON_MINING_LASER:
-		case WEAPON_MILITARY_LASER:
-            if ([self hasLaserCooler])
-            {
-                new_shot_temp = weapon_shot_temperature - (weapon_shot_temperature / SUPER_COOLER_RADIATOR_COOLING_MULTIPLIER);
-            }
-			break;
-            
-		case WEAPON_PLASMA_CANNON:
-		case WEAPON_THARGOID_LASER:
-			new_shot_temp = weapon_shot_temperature;
-            break;
-	}
-    
-    return new_shot_temp;
-}
 
 - (OOWeaponType) weaponForFacing:(OOWeaponFacing)facing
 {
@@ -4426,6 +4454,56 @@ static GLfloat		sBaseMass = 0.0;
 {
 	return [self hasEquipmentItem:@"EQ_ENERGY_BOMB"];
 }
+
+// override ShipEntity definition to ensure that 
+// if shields are still up, always hit the main entity and take the damage
+// on the shields
+- (GLfloat) doesHitLine:(Vector)v0 :(Vector)v1 :(ShipEntity **)hitEntity
+{
+	if (hitEntity)
+		hitEntity[0] = (ShipEntity*)nil;
+	Vector u0 = vector_between(position, v0);	// relative to origin of model / octree
+	Vector u1 = vector_between(position, v1);
+	Vector w0 = make_vector(dot_product(u0, v_right), dot_product(u0, v_up), dot_product(u0, v_forward));	// in ijk vectors
+	Vector w1 = make_vector(dot_product(u1, v_right), dot_product(u1, v_up), dot_product(u1, v_forward));
+	GLfloat hit_distance = [octree isHitByLine:w0 :w1];
+	if (hit_distance)
+	{
+		if (hitEntity)
+			hitEntity[0] = self;
+	}
+
+	bool shields = false;
+	if ((w0.z >= 0 && forward_shield > 1) || (w0.z <= 0 && aft_shield > 1))
+	{
+		shields = true;
+	}
+	
+	NSEnumerator	*subEnum = nil;
+	ShipEntity		*se = nil;
+	for (subEnum = [self shipSubEntityEnumerator]; (se = [subEnum nextObject]); )
+	{
+		Vector p0 = [se absolutePositionForSubentity];
+		Triangle ijk = [se absoluteIJKForSubentity];
+		u0 = vector_between(p0, v0);
+		u1 = vector_between(p0, v1);
+		w0 = resolveVectorInIJK(u0, ijk);
+		w1 = resolveVectorInIJK(u1, ijk);
+		
+		GLfloat hitSub = [se->octree isHitByLine:w0 :w1];
+		if (hitSub && (hit_distance == 0 || hit_distance > hitSub))
+		{	
+			hit_distance = hitSub;
+			if (hitEntity && !shields)
+			{
+				*hitEntity = se;
+			}
+		}
+	}
+	
+	return hit_distance;
+}
+
 
 
 - (void) takeEnergyDamage:(double)amount from:(Entity *)ent becauseOf:(Entity *)other
@@ -4874,6 +4952,20 @@ static GLfloat		sBaseMass = 0.0;
 {
 	if (other == nil || [other isSubEntity])  return;
 	
+	if (other == [UNIVERSE station])
+	{
+		// there is no way the player can destroy the main station
+		// and so the explosion will be cancelled, so there shouldn't
+		// be a kill award
+		return;
+	}
+
+	if ([self isCloaked])
+	{
+		// no-one knows about it; no award
+		return;
+	}
+
 	OOCreditsQuantity	score = 10 * [other bounty];
 	OOScanClass			killClass = [other scanClass]; // **tgape** change (+line)
 	BOOL				killAward = [other countsAsKill];
@@ -4896,7 +4988,7 @@ static GLfloat		sBaseMass = 0.0;
 			}
 		}
 	}
-	
+
 	credits += score;
 	
 	if (score > 9)
@@ -5046,6 +5138,8 @@ static GLfloat		sBaseMass = 0.0;
 	
 	energy = 0.0f;
 	afterburner_engaged = NO;
+	[self disengageAutopilot];
+
 	[UNIVERSE setDisplayText:NO];
 	[UNIVERSE setViewDirection:VIEW_AFT];
 	
@@ -5241,19 +5335,27 @@ static GLfloat		sBaseMass = 0.0;
 		// 'leaving with those guns were you sir?'
 		[self markAsOffender:[UNIVERSE legalStatusOfManifest:shipCommodityData] withReason:kOOLegalStatusReasonIllegalExports];
 	}
+	OOGUIScreenID	oldScreen = gui_screen;
+	gui_screen = GUI_SCREEN_MAIN;
+	[self noteGUIDidChangeFrom:oldScreen to:gui_screen];
+
 	[self loadCargoPods];
+	// do not do anything that calls JS handlers between now and calling
+	// [station launchShip] below, or the cargo returned by JS may be off
+	// CIM - 3.2.2012
 	
 	// clear the way
 	[station autoDockShipsOnApproach];
 	[station clearDockingCorridor];
 
-	[self setAlertFlag:ALERT_FLAG_DOCKED to:NO];
+//	[self setAlertFlag:ALERT_FLAG_DOCKED to:NO];
+	[self clearAlertFlags];
 	[self setDockingClearanceStatus:DOCKING_CLEARANCE_STATUS_NONE];
 	
 	[hud setScannerZoom:1.0];
 	scanner_zoom_rate = 0.0f;
 	currentWeaponFacing = WEAPON_FACING_FORWARD;
-	gui_screen = GUI_SCREEN_MAIN;
+	
 	[self clearTargetMemory];
 	[self setShowDemoShips:NO];
 	[UNIVERSE setDisplayText:NO];
@@ -5265,7 +5367,8 @@ static GLfloat		sBaseMass = 0.0;
 
 	[UNIVERSE forceWitchspaceEntries];
 	ship_clock_adjust += 600.0;			// 10 minutes to leave dock
-	
+	velocity = kZeroVector; // just in case
+
 	[station launchShip:self];
 
 	launchRoll = -flightRoll; // save the station's spin. (inverted for player)
@@ -5414,6 +5517,17 @@ static GLfloat		sBaseMass = 0.0;
 	return YES;
 }
 
+- (void) setJumpType:(BOOL)isGalacticJump
+{
+	if (isGalacticJump)
+	{
+		galactic_witchjump = YES;
+	}
+	else
+	{
+		galactic_witchjump = NO;
+	}
+}
 
 - (double) hyperspaceJumpDistance
 {
@@ -9626,6 +9740,17 @@ else _dockTarget = NO_TARGET;
 	return missionDestinations;
 }
 
+
+- (void) setLastShot:(OOLaserShotEntity *)shot
+{
+	lastShot = shot; 
+/* No need to retain it, since the universe will be for as long as we
+ * reference it. This is needed because the laser shot update routine
+ * is used to correct its position relative to the ship, but isn't
+ * called by Universe on the frame the shot is added (because updates
+ * never are)
+ */
+}
 
 #ifndef NDEBUG
 - (void)dumpSelfState

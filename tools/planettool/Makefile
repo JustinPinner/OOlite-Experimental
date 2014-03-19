@@ -1,12 +1,19 @@
 EXECUTABLE = planettool
+UNAME := $(shell uname -o)
 include planettool-version.inc
 
 
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -I$(FPM_PATH) -I$(OOMATHS_PATH) -DOOMATHS_STANDALONE=1 -DPLANETTOOL_VERSION="\"$(PLANETTOOL_VERSION)\"" -g -ffast-math
+CFLAGS = -I$(FPM_PATH) -I$(OOMATHS_PATH) -DOOMATHS_STANDALONE=1 -DPLANETTOOL_VERSION="\"$(PLANETTOOL_VERSION)\"" -g -ffast-math -I../../src/Core
 LDFLAGS = -lpng -lz
+
+
+ifeq ($(UNAME),Msys)
+	CFLAGS += -I/mingw/../devlibs/include
+	LDFLAGS += -L/mingw/../devlibs/lib
+endif
 
 
 ifndef scheduler
@@ -25,6 +32,11 @@ endif
 
 ifeq ($(asprintf),no)
 	CFLAGS += -DNO_ASPRINTF
+endif
+
+
+ifeq ($(sse2),yes)
+	CFLAGS += -DUSING_SSE2=1 -mtune=generic -mfpmath=sse -msse2
 endif
 
 
@@ -59,7 +71,7 @@ OBJECTS = $(CORE_OBJECTS) $(FPM_OBJECTS) $(OOMATHS_OBJECTS)
 
 
 planettool: $(OBJECTS)
-	$(LD) -o $(EXECUTABLE) $(LDFLAGS) $(OBJECTS)
+	$(LD) -o $(EXECUTABLE) $(OBJECTS) $(LDFLAGS) 
 
 
 # Rule to compile Objective-C maths files as C.

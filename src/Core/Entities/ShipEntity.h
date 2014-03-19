@@ -102,7 +102,6 @@ OOJSScript, OORoleSet, OOShipGroup, OOEquipmentType, OOWeakSet;
 
 
 #define WEAPON_COOLING_FACTOR			6.0f
-#define SUPER_COOLER_RADIATOR_COOLING_MULTIPLIER    3.0f
 #define NPC_MAX_WEAPON_TEMP				256.0f
 #define WEAPON_COOLING_CUTOUT			0.85f
 
@@ -491,11 +490,11 @@ typedef enum
 - (float) volume;
 
 // octree collision hunting
-- (GLfloat)doesHitLine:(Vector) v0 : (Vector) v1;
-- (GLfloat)doesHitLine:(Vector) v0 : (Vector) v1 :(ShipEntity**) hitEntity;
-- (GLfloat)doesHitLine:(Vector) v0 : (Vector) v1 withPosition:(Vector) o andIJK:(Vector) i :(Vector) j :(Vector) k;	// for subentities
+- (GLfloat)doesHitLine:(Vector)v0 :(Vector)v1;
+- (GLfloat)doesHitLine:(Vector)v0 :(Vector)v1 :(ShipEntity**)hitEntity;
+- (GLfloat)doesHitLine:(Vector)v0 :(Vector)v1 withPosition:(Vector)o andIJK:(Vector)i :(Vector)j :(Vector)k;	// for subentities
 
-- (BoundingBox) findBoundingBoxRelativeToPosition:(Vector)opv InVectors:(Vector) _i :(Vector) _j :(Vector) _k;
+- (BoundingBox) findBoundingBoxRelativeToPosition:(Vector)opv InVectors:(Vector)i :(Vector)j :(Vector)k;
 
 - (Vector)absoluteTractorPosition;
 
@@ -535,7 +534,6 @@ typedef enum
 - (Vector) forwardWeaponOffset;
 - (Vector) portWeaponOffset;
 - (Vector) starboardWeaponOffset;
-- (double) calculateShotTemp:(OOWeaponType)weapon_type;
 
 - (BOOL) isFrangible;
 - (BOOL) suppressFlightNotifications;
@@ -591,7 +589,6 @@ typedef enum
 - (BOOL) hasShieldBooster;
 - (BOOL) hasMilitaryShieldEnhancer;
 - (BOOL) hasHeatShield;
-- (BOOL) hasLaserCooler;
 - (BOOL) hasFuelInjection;
 - (BOOL) hasCascadeMine;
 - (BOOL) hasEscapePod;
@@ -609,6 +606,7 @@ typedef enum
 - (float) maxThrust;
 - (float) thrust;
 
+- (void) processBehaviour:(OOTimeDelta)delta_t;
 // Behaviours
 - (void) behaviour_stop_still:(double) delta_t;
 - (void) behaviour_idle:(double) delta_t;
@@ -767,6 +765,7 @@ typedef enum
 - (void) setRoll:(double)amount;
 - (void) setRawRoll:(double)amount; // does not multiply by PI/2
 - (void) setPitch:(double)amount;
+- (void) setYaw:(double)amount;
 - (void) setThrust:(double)amount;
 - (void) applySticks:(double)delta_t;
 

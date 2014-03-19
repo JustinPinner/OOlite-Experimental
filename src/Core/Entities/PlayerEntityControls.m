@@ -205,7 +205,7 @@ static NSTimeInterval	time_last_frame;
 	}
 	
 	// set default keys.
-#define LOAD_KEY_SETTING(name, default)	name = [kdic oo_unsignedShortForKey:@#name defaultValue:default]
+#define LOAD_KEY_SETTING(name, default)	name = [kdic oo_unsignedShortForKey:@#name defaultValue:default]; [kdic setObject:[NSNumber numberWithUnsignedChar:name] forKey:@#name]
 	
 	LOAD_KEY_SETTING(key_roll_left,				gvArrowKeyLeft		);
 	LOAD_KEY_SETTING(key_roll_right,			gvArrowKeyRight		);
@@ -285,6 +285,8 @@ static NSTimeInterval	time_last_frame;
 	if (key_yaw_right == key_roll_right && key_yaw_right == '.')  key_yaw_right = 0;
 	
 	// other keys are SET and cannot be varied
+	[keyconfig_settings release];
+	keyconfig_settings = [[NSDictionary alloc] initWithDictionary:kdic];
 	
 	// Enable polling
 	pollControls=YES;
@@ -1326,22 +1328,11 @@ static NSTimeInterval	time_last_frame;
 					{
 						if (!cloaking_device_active)
 						{
-							if ([self activateCloakingDevice])
-							{
-								[UNIVERSE addMessage:DESC(@"cloak-on") forCount:2];
-								[self playCloakingDeviceOn];
-							}
-							else
-							{
-								[UNIVERSE addMessage:DESC(@"cloak-low-juice") forCount:3];
-								[self playCloakingDeviceInsufficientEnergy];
-							}
+							[self activateCloakingDevice];
 						}
 						else
 						{
 							[self deactivateCloakingDevice];
-							[UNIVERSE addMessage:DESC(@"cloak-off") forCount:2];
-							[self playCloakingDeviceOff];
 						}
 					}
 					cloak_pressed = YES;
@@ -1496,7 +1487,7 @@ static NSTimeInterval	time_last_frame;
 		
 		exceptionContext = @"pause";
 		// Pause game 'p'
-		if ([gameView isDown:key_pausebutton] && gui_screen != GUI_SCREEN_LONG_RANGE_CHART)// look for the 'p' key
+		if ([gameView isDown:key_pausebutton] && gui_screen != GUI_SCREEN_LONG_RANGE_CHART && gui_screen != GUI_SCREEN_MISSION)// look for the 'p' key
 		{
 			if (!pause_pressed)
 			{
@@ -1802,6 +1793,10 @@ static NSTimeInterval	time_last_frame;
 			NSString *commanderFile = [self commanderSelector];
 			if(commanderFile)
 			{
+				// also release the demo ship here (see showShipyardModel and noteGUIDidChangeFrom)
+				[demoShip release];
+				demoShip = nil;
+				
 				[self loadPlayerFromFile:commanderFile];
 			}
 			break;
@@ -3358,7 +3353,7 @@ static BOOL autopilot_pause;
 			toggling_music = NO;
 		}
 		// look for the pause game, 'p' key
-		if ([gameView isDown:key_pausebutton] && gui_screen != GUI_SCREEN_LONG_RANGE_CHART)
+		if ([gameView isDown:key_pausebutton] && gui_screen != GUI_SCREEN_LONG_RANGE_CHART && gui_screen != GUI_SCREEN_MISSION)
 		{
 			if (!autopilot_pause)
 			{
@@ -3487,6 +3482,7 @@ static BOOL autopilot_pause;
 {
 	MyOpenGLView	*gameView = [UNIVERSE gameView];
 	GuiDisplayGen	*gui = [UNIVERSE gui];
+	NSUInteger end_row = 21;
 	
 	switch (gui_screen)
 	{
@@ -3553,7 +3549,11 @@ static BOOL autopilot_pause;
 			break;
 			
 		case GUI_SCREEN_MISSION:
-			if ([[gui keyForRow:21] isEqual:@"spacebar"])
+			if ([[self hud] isHidden])
+			{
+				end_row = 27;
+			}
+			if ([[gui keyForRow:end_row] isEqual:@"spacebar"])
 			{
 				if ([gameView isDown:32])	//  '<space>'
 				{

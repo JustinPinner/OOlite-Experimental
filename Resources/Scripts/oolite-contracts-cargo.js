@@ -37,7 +37,7 @@ this.name			= "oolite-contracts-cargo";
 this.author			= "cim";
 this.copyright		= "© 2012-2013 the Oolite team.";
 this.description	= "Cargo delivery contracts.";
-this.version		= "1.77";
+this.version		= "1.77.1";
 
 /**** Configuration options and API ****/
 
@@ -74,6 +74,11 @@ this.$cargoPageOverlay = "";
  */
 this._addCargoContractToSystem = function(cargo)
 {
+		if (!system.mainStation)
+		{
+				log(this.name,"Contracts require a main station");
+				return false;
+		}
 		if (cargo.destination < 0 || cargo.destination > 255)
 		{
 				log(this.name,"Rejected contract: destination missing or invalid");
@@ -804,7 +809,7 @@ this._acceptContract = function()
 		}
 
 		// give the cargo to the player
-		var result = player.ship.awardContract(cargo.size,cargo.commodity,system.ID,cargo.destination,cargo.deadline,cargo.payment);
+		var result = player.ship.awardContract(cargo.size,cargo.commodity,system.ID,cargo.destination,cargo.deadline,cargo.payment,cargo.deposit);
 		
 		if (result)
 		{

@@ -138,17 +138,28 @@ MA 02110-1301, USA.
 
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:17];
 	OOCommodityType cType;
+	NSString *commodityKey = nil;
 
 	NSArray *commodityKeys = [[NSArray alloc] initWithObjects:@"displayName",@"quantity",@"price",@"marketBasePrice",@"marketEcoAdjustPrice",@"marketEcoAdjustQuantity",@"marketBaseQuantity",@"marketMaskPrice",@"marketMaskQuantity",@"quantityUnit",nil];
+	// displayName not numeric, price and quantity already are
+	// have I missed an obvious "slice of array" function here? - CIM
+	NSArray *numericKeys = [[NSArray alloc] initWithObjects:@"marketBasePrice",@"marketEcoAdjustPrice",@"marketEcoAdjustQuantity",@"marketBaseQuantity",@"marketMaskPrice",@"marketMaskQuantity",@"quantityUnit",nil]; 
 	
 	for (cType=COMMODITY_FOOD; cType <= COMMODITY_ALIEN_ITEMS; cType++)
 	{
 		NSArray *marketLine = [localMarket objectAtIndex:cType];
 		NSMutableDictionary *commodity = [NSMutableDictionary dictionaryWithObjects:marketLine forKeys:commodityKeys];
+		NSEnumerator	*keyEnum = [numericKeys objectEnumerator];
+		while ((commodityKey = [keyEnum nextObject]))
+		{
+			// convert value to int from string
+			[commodity setObject:[NSNumber numberWithInt:[commodity oo_intForKey:commodityKey]] forKey:commodityKey];
+		}
 		[result setObject:commodity forKey:CommodityTypeToString(cType)];
 	}
 
 	[commodityKeys release];
+	[numericKeys release];
 
   return [NSDictionary dictionaryWithDictionary:result];
 }
@@ -600,11 +611,9 @@ NSDictionary *OOMakeDockingInstructions(StationEntity *station, Vector coords, f
 	{
 		isStation = YES;
 		_shipsOnHold = [[OOWeakSet alloc] init];
+		hasBreakPattern = YES;
+		localInterfaces = [[NSMutableDictionary alloc] init];
 	}
-
-	hasBreakPattern = YES;
-	localInterfaces = [[NSMutableDictionary alloc] init];
-	
 	return self;
 	
 	OOJS_PROFILE_EXIT
@@ -713,8 +722,21 @@ NSDictionary *OOMakeDockingInstructions(StationEntity *station, Vector coords, f
 	{
 		return NO;
 	}
-	// and now check for docks
+
 	NSEnumerator	*subEnum = nil;
+
+#ifndef NDEBUG
+	ShipEntity *subEntity = nil;
+	for (subEnum = [self shipSubEntityEnumerator]; (subEntity = [subEnum nextObject]); )
+	{
+		if ([subEntity isStation])
+		{
+			OOLog(@"setup.ship.badType.subentities",@"Subentity %@ (%@) of station %@ is itself a StationEntity. This is an internal error - please report it. ",subEntity,[subEntity shipDataKey],[self displayName]);
+		}
+	}
+#endif
+
+	// and now check for docks
 	DockEntity		*sub = nil;
 	for (subEnum = [self dockSubEntityEnumerator]; (sub = [subEnum nextObject]); )
 	{
@@ -1080,7 +1102,7 @@ NSDictionary *OOMakeDockingInstructions(StationEntity *station, Vector coords, f
 	}
 
 	OOLog(@"station.launchShip.failed", @"Cancelled launch for a %@ with role %@, as it is too large for the docking port of the %@.",
-			  [ship displayName], [ship primaryRole], [self displayName]);
+			  [ship displayName], [ship primaryRole], self);
 	return NO;
 }	
 

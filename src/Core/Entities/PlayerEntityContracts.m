@@ -291,8 +291,9 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 		NSString* contract_cargo_desc = [contract_info oo_stringForKey:CARGO_KEY_DESCRIPTION];
 		int dest = [contract_info oo_intForKey:CONTRACT_KEY_DESTINATION];
 		int dest_eta = [contract_info oo_doubleForKey:CONTRACT_KEY_ARRIVAL_TIME] - ship_clock;
-		
-		int premium = 10 * [contract_info oo_floatForKey:CONTRACT_KEY_PREMIUM];
+	
+		// no longer needed
+		// int premium = 10 * [contract_info oo_floatForKey:CONTRACT_KEY_PREMIUM];
 		int fee = 10 * [contract_info oo_floatForKey:CONTRACT_KEY_FEE];
 		
 		int contract_cargo_type = [contract_info oo_intForKey:CARGO_KEY_TYPE];
@@ -320,9 +321,12 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 						[shipCommodityData release];
 					shipCommodityData = [[NSArray arrayWithArray:manifest] retain];
 					// pay the premium and fee
-					credits += fee + premium;
+					// credits += fee + premium;
+					// not any more: all contracts initially awarded by JS, so fee
+					// is now all that needs to be paid - CIM
 					
-					[result appendFormatLine:DESC(@"cargo-delivered-okay-@-@"), contract_cargo_desc, OOCredits(fee + premium)];
+					credits += fee;
+					[result appendFormatLine:DESC(@"cargo-delivered-okay-@-@"), contract_cargo_desc, OOCredits(fee)];
 					
 					[contracts removeObjectAtIndex:i--];
 					// repute++
@@ -342,9 +346,9 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 						[manifest replaceObjectAtIndex:contract_cargo_type withObject:commodityInfo];
 						[shipCommodityData release];
 						shipCommodityData = [[NSArray arrayWithArray:manifest] retain];
-						// pay the premium and fee
+						// pay the fee
 						int shortfall = 100 - percent_delivered;
-						int payment = percent_delivered * (fee + premium) / 100.0;
+						int payment = percent_delivered * (fee) / 100.0;
 						credits += payment;
 						
 						[result appendFormatLine:DESC(@"cargo-delivered-short-@-@-d"), contract_cargo_desc, OOCredits(payment), shortfall];
@@ -466,13 +470,13 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 	int good = [reputation oo_intForKey:PASSAGE_GOOD_KEY];
 	int bad = [reputation oo_intForKey:PASSAGE_BAD_KEY];
 	int unknown = [reputation oo_intForKey:PASSAGE_UNKNOWN_KEY];
-	
+
 	if (unknown > 0)
 		unknown = 7 - (market_rnd % unknown);
 	else
 		unknown = 7;
 	
-	return (good + unknown - 2 * bad) / 2;	// return a number from -7 to +7
+	return (good + unknown - 3 * bad) / 2;	// return a number from -7 to +7
 }
 
 
@@ -541,7 +545,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 	else
 		unknown = 7;
 	
-	return (good + unknown - 2 * bad) / 2;	// return a number from -7 to +7
+	return (good + unknown - 3 * bad) / 2;	// return a number from -7 to +7
 }
 
 
@@ -610,7 +614,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 	else
 		unknown = 7;
 	
-	return (good + unknown - 2 * bad) / 2;	// return a number from -7 to +7
+	return (good + unknown - 3 * bad) / 2;	// return a number from -7 to +7
 }
 
 
@@ -982,7 +986,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 */
 
 
-- (BOOL) addPassenger:(NSString*)Name start:(unsigned)start destination:(unsigned)Destination eta:(double)eta fee:(double)fee
+- (BOOL) addPassenger:(NSString*)Name start:(unsigned)start destination:(unsigned)Destination eta:(double)eta fee:(double)fee advance:(double)advance
 {
 	NSDictionary* passenger_info = [NSDictionary dictionaryWithObjectsAndKeys:
 		Name,																	PASSENGER_KEY_NAME,
@@ -991,7 +995,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 		[NSNumber numberWithDouble:[PLAYER clockTime]],	CONTRACT_KEY_DEPARTURE_TIME,
 		[NSNumber numberWithDouble:eta],										CONTRACT_KEY_ARRIVAL_TIME,
 		[NSNumber numberWithDouble:fee],										CONTRACT_KEY_FEE,
-		[NSNumber numberWithInt:0],												CONTRACT_KEY_PREMIUM,
+		[NSNumber numberWithDouble:advance],												CONTRACT_KEY_PREMIUM,
 		NULL];
 	
 	// extra checks, just in case.
@@ -1071,7 +1075,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 
 
 - (BOOL) awardContract:(unsigned)qty commodity:(NSString*)commodity start:(unsigned)start
-						destination:(unsigned)Destination eta:(double)eta fee:(double)fee
+					 destination:(unsigned)Destination eta:(double)eta fee:(double)fee premium:(double)premium
 {
 	OOCommodityType	type = [UNIVERSE commodityForName: commodity];
 	Random_Seed		r_seed = [UNIVERSE marketSeed];
@@ -1099,7 +1103,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 		[NSNumber numberWithDouble:[PLAYER clockTime]],	CONTRACT_KEY_DEPARTURE_TIME,
 		[NSNumber numberWithDouble:eta],				CONTRACT_KEY_ARRIVAL_TIME,
 		[NSNumber numberWithDouble:fee],				CONTRACT_KEY_FEE,
-		[NSNumber numberWithInt:0],						CONTRACT_KEY_PREMIUM,
+		[NSNumber numberWithDouble:premium],						CONTRACT_KEY_PREMIUM,
 		NULL];
 	
 	// check available space
@@ -1500,7 +1504,7 @@ static NSString * const kOOLogNoteShowShipyardModel = @"script.debug.note.showSh
 			}
 			[gui setArray:[NSArray arrayWithObjects:DESC(@"gui-more"), @" --> ",nil] forRow:MANIFEST_SCREEN_ROW_NEXT];
 
-			[gui setSelectableRange:NSMakeRange(r_start,r_end)];
+			[gui setSelectableRange:NSMakeRange(r_start,r_end+1-r_start)];
 			[gui setSelectedRow:r_start];
 
 		}
@@ -2034,6 +2038,10 @@ static NSMutableDictionary *currentShipyard = nil;
 	
 	[self newShipCommonSetup:shipKey yardInfo:ship_info baseInfo:ship_base_dict];
 
+	// perform the transformation
+	NSDictionary* cmdr_dict = [self commanderDataDictionary];	// gather up all the info
+	if (![self setCommanderDataFromDictionary:cmdr_dict])  return NO;
+
 	// refill from ship_info
 	NSArray* extras = [NSMutableArray arrayWithArray:[[ship_info oo_dictionaryForKey:KEY_STANDARD_EQUIPMENT] oo_arrayForKey:KEY_EQUIPMENT_EXTRAS]];
 	for (unsigned i = 0; i < [extras count]; i++)
@@ -2049,10 +2057,6 @@ static NSMutableDictionary *currentShipyard = nil;
 			[self addEquipmentItem:eq_key withValidation:YES inContext:@"newShip"]; 
 		}
 	}
-
-	// perform the transformation
-	NSDictionary* cmdr_dict = [self commanderDataDictionary];	// gather up all the info
-	if (![self setCommanderDataFromDictionary:cmdr_dict])  return NO;
 
 	[self setEntityPersonalityInt:[ship_info oo_unsignedShortForKey:SHIPYARD_KEY_PERSONALITY]];
 	

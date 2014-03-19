@@ -37,7 +37,7 @@ this.name			= "oolite-contracts-passengers";
 this.author			= "cim";
 this.copyright		= "© 2012-2013 the Oolite team.";
 this.description	= "Parcel delivery contracts.";
-this.version		= "1.77";
+this.version		= "1.77.1";
 
 /**** Configuration options and API ****/
 
@@ -74,6 +74,11 @@ this.$passengerPageOverlay = "";
  */
 this._addPassengerToSystem = function(passenger)
 {
+		if (!system.mainStation)
+		{
+				log(this.name,"Contracts require a main station");
+				return false;
+		}
 		if (!passenger.name || passenger.name.length > 40)
 		{
 				log(this.name,"Rejected passenger: name missing or too long");
@@ -722,7 +727,7 @@ this._acceptContract = function()
 		var passenger = this.$passengers[this.$contractIndex];
 
 		// give the passenger to the player
-		var result = player.ship.addPassenger(passenger.name,system.ID,passenger.destination,passenger.deadline,passenger.payment);
+		var result = player.ship.addPassenger(passenger.name,system.ID,passenger.destination,passenger.deadline,passenger.payment,passenger.advance);
 		
 		if (result)
 		{

@@ -202,8 +202,6 @@
 		1A2318810B9D026D00EF0852 /* missile.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318400B9D026D00EF0852 /* missile.png */; };
 		1A2318820B9D026D00EF0852 /* moray_redux.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318410B9D026D00EF0852 /* moray_redux.png */; };
 		1A2318830B9D026D00EF0852 /* moray_redux1.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318420B9D026D00EF0852 /* moray_redux1.png */; };
-		1A2318840B9D026D00EF0852 /* MorayMED_bottom.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318430B9D026D00EF0852 /* MorayMED_bottom.png */; };
-		1A2318850B9D026D00EF0852 /* MorayMED_top.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318440B9D026D00EF0852 /* MorayMED_top.png */; };
 		1A23188A0B9D026D00EF0852 /* pod2_redux.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A2318490B9D026D00EF0852 /* pod2_redux.png */; };
 		1A23188B0B9D026D00EF0852 /* python_redux.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A23184A0B9D026D00EF0852 /* python_redux.png */; };
 		1A23188C0B9D026D00EF0852 /* python_redux1.png in Copy Textures */ = {isa = PBXBuildFile; fileRef = 1A23184B0B9D026D00EF0852 /* python_redux1.png */; };
@@ -1105,8 +1103,6 @@
 				1A2318810B9D026D00EF0852 /* missile.png in Copy Textures */,
 				1A2318820B9D026D00EF0852 /* moray_redux.png in Copy Textures */,
 				1A2318830B9D026D00EF0852 /* moray_redux1.png in Copy Textures */,
-				1A2318840B9D026D00EF0852 /* MorayMED_bottom.png in Copy Textures */,
-				1A2318850B9D026D00EF0852 /* MorayMED_top.png in Copy Textures */,
 				1A23188A0B9D026D00EF0852 /* pod2_redux.png in Copy Textures */,
 				1A23188B0B9D026D00EF0852 /* python_redux.png in Copy Textures */,
 				1A23188C0B9D026D00EF0852 /* python_redux1.png in Copy Textures */,
@@ -1370,7 +1366,7 @@
 		1A047A440DCA0F4F00EE1CD0 /* NSDictionaryOOExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDictionaryOOExtensions.m; sourceTree = "<group>"; };
 		1A047B7C0DCB3D7500EE1CD0 /* OOProbabilitySet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OOProbabilitySet.h; sourceTree = "<group>"; };
 		1A047B7D0DCB3D7500EE1CD0 /* OOProbabilitySet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OOProbabilitySet.m; sourceTree = "<group>"; };
-		1A0519340C7CCAC900BA5CCA /* DebugOXP.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DebugOXP.xcodeproj; path = DebugOXP/DebugOXP.xcodeproj; sourceTree = "<group>"; };
+		1A0519340C7CCAC900BA5CCA /* DebugOXP.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DebugOXP.xcodeproj; path = Mac-specific/DebugOXP/DebugOXP.xcodeproj; sourceTree = "<group>"; };
 		1A062C8711B28D8A00727C1D /* NSObjectOOExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSObjectOOExtensions.h; sourceTree = "<group>"; };
 		1A062C8811B28D8A00727C1D /* NSObjectOOExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObjectOOExtensions.m; sourceTree = "<group>"; };
 		1A06F2851196E5B100AFA5B4 /* OOCASoundDebugMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OOCASoundDebugMonitor.h; sourceTree = "<group>"; };
@@ -1509,8 +1505,6 @@
 		1A2318400B9D026D00EF0852 /* missile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = missile.png; sourceTree = "<group>"; };
 		1A2318410B9D026D00EF0852 /* moray_redux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moray_redux.png; sourceTree = "<group>"; };
 		1A2318420B9D026D00EF0852 /* moray_redux1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moray_redux1.png; sourceTree = "<group>"; };
-		1A2318430B9D026D00EF0852 /* MorayMED_bottom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MorayMED_bottom.png; sourceTree = "<group>"; };
-		1A2318440B9D026D00EF0852 /* MorayMED_top.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MorayMED_top.png; sourceTree = "<group>"; };
 		1A2318490B9D026D00EF0852 /* pod2_redux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pod2_redux.png; sourceTree = "<group>"; };
 		1A23184A0B9D026D00EF0852 /* python_redux.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = python_redux.png; sourceTree = "<group>"; };
 		1A23184B0B9D026D00EF0852 /* python_redux1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = python_redux1.png; sourceTree = "<group>"; };
@@ -2358,8 +2352,6 @@
 				1A2318400B9D026D00EF0852 /* missile.png */,
 				1A2318410B9D026D00EF0852 /* moray_redux.png */,
 				1A2318420B9D026D00EF0852 /* moray_redux1.png */,
-				1A2318430B9D026D00EF0852 /* MorayMED_bottom.png */,
-				1A2318440B9D026D00EF0852 /* MorayMED_top.png */,
 				1A21149D0DEA98D100444CEB /* oolite-ball-turret.png */,
 				1AE834C90D9598C10097CB8A /* oolite-barrel-specular.png */,
 				B3A96403165EE124001BB5C1 /* oolite-exhaust-blur.png */,
@@ -4339,7 +4331,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = Debug;
@@ -4348,7 +4339,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = Deployment;
@@ -4357,7 +4347,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				OOLITE_VERSION = 1.77.1;
 				PRODUCT_NAME = "Build All";
 			};
 			name = TestRelease;

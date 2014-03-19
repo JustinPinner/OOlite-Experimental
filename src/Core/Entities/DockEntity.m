@@ -252,7 +252,7 @@ MA 02110-1301, USA.
 
 - (BOOL) isOffCentre
 {
-	if (fabs(position.x) + fabs(position.y) > 0.1f)
+	if (fabs(position.x) + fabs(position.y) > 5.0f)
 	{
 		return YES;
 	}
@@ -629,6 +629,10 @@ MA 02110-1301, USA.
 	// control, if allow_docking is false but d_d_c is true
 	
 	StationEntity *station = (StationEntity *)[self parentEntity];
+	if ([station status] == STATUS_DEAD)
+	{
+		return NO;
+	}
 	
 	Quaternion q0 = quaternion_multiply(orientation, [station orientation]);
 	Vector vi = vector_right_from_quaternion(q0);
@@ -682,11 +686,13 @@ MA 02110-1301, USA.
 	{
 		if ([ship status] != STATUS_LAUNCHING && !allow_docking_thisship)
 		{ // launch-only dock: will collide!
-			[ship takeScrapeDamage: 5 * [UNIVERSE getTimeDelta]*[ship flightSpeed] from:station];
-			// and bounce
-			Vector rel = vector_subtract([ship position],port_pos);
-			rel = vector_multiply_scalar(vector_normal(rel),[ship flightSpeed]*0.4);
-			[ship adjustVelocity:rel];
+			if (arbb.min.z < dd) {
+				[ship takeScrapeDamage: 5 * [UNIVERSE getTimeDelta]*[ship flightSpeed] from:station];
+				// and bounce
+				Vector rel = vector_subtract([ship position],port_pos);
+				rel = vector_multiply_scalar(vector_normal(rel),[ship flightSpeed]*0.4);
+				[ship adjustVelocity:rel];
+			}
 
 			if (arbb.max.z < 0.0)
 			{ // give some warning before exploding...
@@ -826,6 +832,7 @@ MA 02110-1301, USA.
 	// launch roll/pitch
 	[ship setRoll:[station flightRoll]];
 	[ship setPitch:0.0];
+	[ship setYaw:0.0];
 	[UNIVERSE addEntity:ship];
 	[ship setStatus: STATUS_LAUNCHING];
 	[ship setDesiredSpeed:launchSpeed]; // must be set after initialising the AI to correct any speed set by AI
