@@ -1313,7 +1313,6 @@ static ShipEntity *doOctreesCollide(ShipEntity *prime, ShipEntity *other);
 	[subEntities makeObjectsPerformSelector:@selector(wasRemovedFromUniverse)];
 }
 
-
 - (Vector)absoluteTractorPosition
 {
 	return vector_add(position, quaternion_rotate_vector([self normalOrientation], tractor_position));
